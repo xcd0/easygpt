@@ -115,9 +115,6 @@ Options:
 * golang本体
     * [golang/go](https://github.com/golang/go)
         * BSD 3-Clause "New" or "Revised" License
-* ライセンス生成
-    * [Songmu/gocredits](https://github.com/Songmu/gocredits)
-        * MIT License
 
 ## LICENSE
 
