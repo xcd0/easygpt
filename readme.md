@@ -3,6 +3,11 @@
 テキストファイルをchatgptのapiに投げる。  
 翻訳や、ソースコードにコメントを付けさせたりと、使い方次第で色々できる。
 
+## install
+
+```sh
+go install github.com/xcd0/easygpt@latest
+```
 
 ## 使い方1 D&D
 
