@@ -9,7 +9,7 @@
 go install github.com/xcd0/easygpt@latest
 ```
 しかし現状installしても、微妙に使いずらいプログラムになっている。  
-`cp $(which easygpt`) .` とかでバイナリを処理したいディレクトリに持ってくるか、  
+`cp $(which easygpt) .` とかでバイナリを処理したいディレクトリに持ってくるか、  
 コマンドライン引数をちゃんと設定したshellscriptを作成して使用したほうがよい。  
 
 以下の説明はカレントディレクトリにeashgptバイナリがあるという前提になっている。  
