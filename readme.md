@@ -103,6 +103,8 @@ Options:
 
 ## 使用させていただいているOSSライブラリ
 
+各OSSライブラリのライセンスは `./lisenses` にコピーを保持している。
+
 * 引数解析、ヘルプ生成
     * [alexflint/go-arg](https://github.com/alexflint/go-arg)
         * BSD-2-Clause license
@@ -115,6 +117,14 @@ Options:
 * golang本体
     * [golang/go](https://github.com/golang/go)
         * BSD 3-Clause "New" or "Revised" License
+* ライセンスファイル群取得
+    * [google/go-licenses](https://github.com/google/go-licenses)
+        * Apache License 2.0
+* 実行ファイル圧縮
+    * [upx/upx](https://github.com/upx/upx)
+        * GPL2+ or UPX LICENSE
+            * https://upx.github.io/upx-license.html
+        * makeの際にバイナリを使用している。かつ使用後のバイナリを無改変で配布している。プログラムにupxのソースコードは含まない。
 
 ## LICENSE
 
