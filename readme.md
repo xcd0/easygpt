@@ -99,3 +99,28 @@ Options:
 
   --help, -h             display this help and exit
 ```
+
+
+## 使用させていただいているOSSライブラリ
+
+* 引数解析、ヘルプ生成
+    * [alexflint/go-arg](https://github.com/alexflint/go-arg)
+        * BSD-2-Clause license
+* ランダム文字列生成 (別にUUIDである必要はない)
+    * [google/uuid](https://github.com/google/uuid)
+        * BSD-3-Clause license
+* スタックトレース
+    * [pkg/errors](https://github.com/pkg/errors)
+        * BSD 2-Clause "Simplified" License
+* golang本体
+    * [golang/go](https://github.com/golang/go)
+        * BSD 3-Clause "New" or "Revised" License
+* ライセンス生成
+    * [Songmu/gocredits](https://github.com/Songmu/gocredits)
+        * MIT License
+
+## LICENSE
+
+MIT License
+
+
