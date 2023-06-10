@@ -45,8 +45,8 @@ linux:
 	#mv $(DST)/$(BIN).upx $(DST)/$(BIN)
 
 mac:
-	rm -rf $(DST)/$(BIN)
-	GOOS=darwin go build -o $(DST)/$(BIN) $(FLAGS_UNIX) $(FLAGS)
+	rm -rf $(DST)/$(BIN)_mac
+	GOOS=darwin go build -o $(DST)/$(BIN)_mac $(FLAGS_UNIX) $(FLAGS)
 	#rm -rf $(DST)/$(BIN).upx && upx $(DST)/$(BIN) -o $(DST)/$(BIN).upx
 	#rm -rf $(DST)/$(BIN)
 	#mv $(DST)/$(BIN).upx $(DST)/$(BIN)
@@ -62,7 +62,16 @@ pi:
 upx:
 	until sudo apt install upx -y --fix-missing; do sleep 1; done
 
-licence:
+license:
 	go-licenses save . --save_path licenses
 	rm -rf licenses/easygpt
+
+
+install-upx:
+	sudo apt install upx
+install-go-licenses:
+	go install github.com/google/go-licenses@latest
+install-commitlint:
+	go install github.com/conventionalcommit/commitlint@latest
+
 

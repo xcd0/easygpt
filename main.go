@@ -1,8 +1,9 @@
 package main
 
 import (
-	"easygpt/internal"
 	"log"
+
+	"github.com/xcd0/easygpt/internal"
 )
 
 func main() {
