@@ -9,7 +9,8 @@
 1. 実行ファイルと同じディレクトリに2つテキストファイルを作成する。
 	* `./apikey.txt`
 		* APIキーを書き込む。  
-		`echo "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" > ./apikey.txt`
+		例) `echo "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" > ./apikey.txt`
+            * このAPIキーは無効なのでちゃんと自分のアカウントで発行して設定すること。
 		* APIキーは https://platform.openai.com/account/api-keys から発行できる。
 	* `./prompt.txt`
 		* これはなくてもよい。
