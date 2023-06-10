@@ -1,4 +1,4 @@
-module easygpt
+module github.com/xcd0/easygpt
 
 go 1.20
 
