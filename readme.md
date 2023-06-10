@@ -9,7 +9,8 @@
 1. 実行ファイルと同じディレクトリに2つテキストファイルを作成する。
 	* `./apikey.txt`
 		* APIキーを書き込む。  
-		`echo "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" > ./apikey.txt`
+		例) `echo "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" > ./apikey.txt`
+            * このAPIキーは無効なのでちゃんと自分のアカウントで発行して設定すること。
 		* APIキーは https://platform.openai.com/account/api-keys から発行できる。
 	* `./prompt.txt`
 		* これはなくてもよい。
@@ -98,3 +99,25 @@ Options:
 
   --help, -h             display this help and exit
 ```
+
+
+## 使用させていただいているOSSライブラリ
+
+* 引数解析、ヘルプ生成
+    * [alexflint/go-arg](https://github.com/alexflint/go-arg)
+        * BSD-2-Clause license
+* ランダム文字列生成 (別にUUIDである必要はない)
+    * [google/uuid](https://github.com/google/uuid)
+        * BSD-3-Clause license
+* スタックトレース
+    * [pkg/errors](https://github.com/pkg/errors)
+        * BSD 2-Clause "Simplified" License
+* golang本体
+    * [golang/go](https://github.com/golang/go)
+        * BSD 3-Clause "New" or "Revised" License
+
+## LICENSE
+
+MIT License
+
+
