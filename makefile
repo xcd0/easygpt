@@ -14,7 +14,8 @@ FLAGS_WIN=-tags netgo -installsuffix netgo -trimpath "-ldflags=-buildid=" -ldfla
 all:
 	make win
 	make linux
-	#make mac
+	make mac
+	make license
 
 run:
 	go build
@@ -60,4 +61,8 @@ pi:
 
 upx:
 	until sudo apt install upx -y --fix-missing; do sleep 1; done
+
+licence:
+	go-licenses save . --save_path licenses
+	rm -rf licenses/easygpt
 
