@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/pkg/errors"
 )
 
 type OpenaiRequest struct {
@@ -41,13 +43,40 @@ type Usage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
+const (
+	openaiURL = "https://api.openai.com/v1/chat/completions"
+	aiModel   = "gpt-3.5-turbo"
+)
+
 func GetOpenAIResponse(messages *[]Message, apiKey, tmpdir string, tmpflag bool) OpenaiResponse {
+	var req *http.Request = CreateHttpRequest(messages, apiKey, tmpdir, tmpflag)
+
+	var body []byte = GetResponseBody(req, tmpdir, tmpflag)
+
+	return func(body []byte, messages *[]Message) OpenaiResponse {
+		var response OpenaiResponse
+		if err := json.Unmarshal(body, &response); err != nil {
+			log.Printf("Error: %v", err.Error())
+			return OpenaiResponse{}
+		}
+		if len(response.Choices) == 0 {
+			//log.Printf("Error: レスポンスがありませんでした。")
+			//log.Printf("       %v", response)
+			return OpenaiResponse{}
+		}
+		*messages = append(*messages, Message{
+			Role:    "assistant",
+			Content: response.Choices[0].Messages.Content,
+		})
+		return response
+	}(body, messages)
+}
+
+func CreateHttpRequest(messages *[]Message, apiKey, tmpdir string, tmpflag bool) *http.Request {
 	requestBody := OpenaiRequest{
-		Model:    "gpt-3.5-turbo",
+		Model:    aiModel,
 		Messages: *messages,
 	}
-
-	const openaiURL = "https://api.openai.com/v1/chat/completions"
 
 	requestJSON, _ := json.Marshal(requestBody)
 
@@ -59,12 +88,14 @@ func GetOpenAIResponse(messages *[]Message, apiKey, tmpdir string, tmpflag bool)
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
-
 	req.Header.Set("Content-Type", "application/json")
-
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", apiKey))
+	return req
+}
 
+func GetResponseBody(req *http.Request, tmpdir string, tmpflag bool) []byte {
 	client := &http.Client{}
+	//log.Printf("Request: %v", *req)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Error: %v", err)
@@ -81,31 +112,32 @@ func GetOpenAIResponse(messages *[]Message, apiKey, tmpdir string, tmpflag bool)
 		log.Printf("Error: %v", err)
 	}
 
+	func() {
+		var responseError struct {
+			Error struct {
+				Message string `json:"message"`
+				Type    string `json:"type"`
+				Param   string `json:"param"`
+				Code    string `json:"code"`
+			} `json:"error"`
+		}
+		err := json.Unmarshal(body, &responseError)
+		if err != nil {
+			log.Printf("Error: %v", err)
+		}
+		if responseError.Error.Code == "invalid_api_key" {
+			log.Printf("%v", string(body))
+			//log.Printf("%v", responseError.Error.Code)
+			err := errors.Errorf("APIキーが不正です。公式サイトからAPIキーを再発行して、設定してください。\nhttps://platform.openai.com/account/api-keys\n\n")
+			//fmt.Printf("%+v", err)
+			fmt.Printf("%v", err)
+		}
+	}()
+
+	j := JsonFormat(body)
+	//log.Printf("response body:\n%v", j)
 	if tmpflag {
-		OutputTextForCheck(filepath.Join(tmpdir, "response.json"), JsonFormat(requestJSON))
+		OutputTextForCheck(filepath.Join(tmpdir, "response.json"), j)
 	}
-
-	var response OpenaiResponse
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		log.Printf("Error: %v", err.Error())
-		return OpenaiResponse{}
-	}
-
-	if len(response.Choices) == 0 {
-		log.Printf("Error: レスポンスがありませんでした。")
-		return OpenaiResponse{}
-	}
-	*messages = append(*messages, Message{
-		Role:    "assistant",
-		Content: response.Choices[0].Messages.Content,
-	})
-
-	return response
-}
-
-func JsonFormat(body []byte) string {
-	var buf bytes.Buffer
-	json.Indent(&buf, body, "", "\t")
-	return buf.String()
+	return body
 }

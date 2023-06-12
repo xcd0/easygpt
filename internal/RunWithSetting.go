@@ -24,6 +24,9 @@ func RunWithSetting(settings []Setting) {
 		}
 
 		// 一時ファイルを保存するためのディレクトリを作成する。
+		if setting.Tmp == "" {
+			setting.Tmp = "tmp"
+		}
 		os.RemoveAll(setting.Tmp)
 		if err := os.Mkdir(setting.Tmp, 0777); err != nil {
 			fe, e := "file exists", err.Error()
@@ -44,7 +47,7 @@ func RunWithSetting(settings []Setting) {
 				defer wg.Done()
 				defer func() { <-sem }() // 処理が終わったらチャネルを解放
 
-				Ask(f, setting.InputDir, setting.OutputDir, setting.Tmp, setting.ApiKey, &setting.Prompt)
+				Ask(f, setting.InputDir, setting.OutputDir, setting.Tmp, setting.Apikey, &setting.Prompt)
 
 			}()
 		}

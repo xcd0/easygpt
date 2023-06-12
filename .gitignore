@@ -1,6 +1,12 @@
 apikey.txt
 prompt.txt
+easygpt.hjson 
 easygpt
 easygpt.exe
 easygpt_mac
+
+internal/for_test/apikey.txt
+internal/for_test/output
+internal/for_test/tmp
+
 

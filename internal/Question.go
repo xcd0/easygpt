@@ -27,9 +27,14 @@ func Question(apikey string, prompt *string, input path, tmpdir path, tmpflag bo
 	//log.Printf("response: %v", response)
 	//log.Printf(": %v", response)
 
+	if len(response.Choices) == 0 {
+		//log.Printf("Error: no response.")
+		//log.Printf("       %v", response)
+		return ""
+	}
+
 	output := response.Choices[0].Messages.Content
 	if tmpflag {
-		OutputTextForCheck(filepath.Join(tmpdir, "response.txt"), fmt.Sprintf("%v", response))
 		OutputTextForCheck(filepath.Join(tmpdir, "output.txt"), output)
 	}
 	return output

@@ -7,6 +7,7 @@ import (
 )
 
 func TestCheckPathAndRunFunction(t *testing.T) {
+	log.SetFlags(log.Ltime | log.Lshortfile) // ログの出力書式を設定する
 
 	paths := []string{
 		"CheckPathAndRunFunction.go",
@@ -18,13 +19,13 @@ func TestCheckPathAndRunFunction(t *testing.T) {
 		CheckPathAndRunFunction(
 			p,
 			func(err error) {
-				log.Printf("Error: %v", err)
+				t.Logf("Error: %v", err)
 			},
 			func() {
-				log.Printf("%v: dir : %v", i, p)
+				t.Logf("%v: dir : %v", i, p)
 			},
 			func() {
-				log.Printf("%v: file: %v", i, p)
+				t.Logf("%v: file: %v", i, p)
 			},
 		)
 	}

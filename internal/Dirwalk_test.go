@@ -4,6 +4,7 @@ import (
 	"log"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -13,11 +14,18 @@ func TestDirwalk(t *testing.T) {
 	path := "../internal"
 	apath, _ := filepath.Abs(path)
 	t.Logf("Dir: %v", apath)
-	ans := 4
-	if true {
-		ans, _ = strconv.Atoi(RunOnBash("tree -d %v | grep 'directories' | awk '{print $1}'", apath))
-		t.Logf("find %v -type d | wc -l --> %v", apath, ans)
+
+	ansstr := RunOnBash("tree -d %v | grep 'directories' | awk '{print $1}'", apath)
+	t.Logf("ansstr: %v", ansstr)
+
+	ansstr = strings.ReplaceAll(ansstr, "\n", "")
+	ans, err := strconv.Atoi(ansstr)
+	if err != nil {
+		t.Logf("Error: Atoi: %v", err)
 	}
+	t.Logf("ans : %v", ans)
+
+	t.Logf("tree -d %v | grep 'directories' | awk '{print $1}' -> %v", apath, ans)
 
 	fes, err := Dirwalk(apath)
 
