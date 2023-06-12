@@ -9,6 +9,58 @@ import (
 	"github.com/pkg/errors"
 )
 
+func GetPathWithCurrentDir(path string) string {
+	return filepath.Join(GetCurrentDir(), path)
+}
+func GetPathWithHomeDir(path string) string {
+	ret, _ := os.UserHomeDir()
+	return ret
+}
+func GetPathWithBinDir(path string) string {
+	ret, _ := os.Executable()
+	return ret
+}
+
+func GetCurrentDir() string {
+	ret, _ := os.Getwd()
+	return ret
+}
+func GetHomeDir() string {
+	ret, _ := os.UserHomeDir()
+	return ret
+}
+func GetBinDir() string {
+	ret, _ := os.Executable()
+	return ret
+}
+
+func GetText(filepath string) (string, error) {
+	b, err := os.ReadFile(filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
+	if err != nil {
+		//log.Print("Error: %v, file: %v", err, filepath)
+		return "", err
+	}
+	return string(b), err
+}
+
+func GetTextNoError(filepath string) string {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Fatalf("%+v", err)
+		}
+	}()
+
+	b, err := os.ReadFile(filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
+	if err != nil {
+		panic(errors.Errorf("Error: %v, file: %v", err, filepath))
+	}
+	return string(b)
+}
+
+func GetFileNameWithoutExt(path string) string {
+	return filepath.Base(path[:len(path)-len(filepath.Ext(path))])
+}
+
 func GetApikey(apikey, apiFile *string) error { // APIキー
 	if len(*apikey) != 0 {
 		// ok
@@ -71,31 +123,4 @@ func GetOutputDir(outputDir *string) error { // 入出力テキストファイ�
 		return errors.Errorf("Error: 出力ディレクトリの指定が不正です。\n       指定されたディレクトリパス: %v", *outputDir)
 	}
 	return nil
-}
-
-func GetText(filepath string) (string, error) {
-	b, err := os.ReadFile(filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
-	if err != nil {
-		//log.Print("Error: %v, file: %v", err, filepath)
-		return "", err
-	}
-	return string(b), err
-}
-
-func GetTextNoError(filepath string) string {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Fatalf("%+v", err)
-		}
-	}()
-
-	b, err := os.ReadFile(filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
-	if err != nil {
-		panic(errors.Errorf("Error: %v, file: %v", err, filepath))
-	}
-	return string(b)
-}
-
-func GetFileNameWithoutExt(path string) string {
-	return filepath.Base(path[:len(path)-len(filepath.Ext(path))])
 }

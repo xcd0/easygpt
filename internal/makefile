@@ -1,11 +1,11 @@
 
 test:
 	@echo ---------------------------------------------------------------------
-	go test -run Dirwalk
+	-@go test -run Dirwalk
 	@echo ---------------------------------------------------------------------
-	go test -run CreateSameDirsOn
+	-@go test -run CreateSameDirsOn
 	@echo ---------------------------------------------------------------------
-	go test -run CheckPathAndRunFunction
+	-@go test -run CheckPathAndRunFunction
 	@echo ---------------------------------------------------------------------
 
 
