@@ -66,3 +66,12 @@ license:
 	go-licenses save . --save_path licenses
 	rm -rf licenses/easygpt
 
+
+install-upx:
+	sudo apt install upx
+install-go-licenses:
+	go install github.com/google/go-licenses@latest
+install-commitlint:
+	go install github.com/conventionalcommit/commitlint@latest
+
+
