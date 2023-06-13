@@ -9,6 +9,9 @@ type Setting struct {
 	Concurrency int    `json:"concurrency" comment:"並列処理数を指定する。初期値1。\nAPIのRateLimitに引っかからない程度に並列したいところ。しかし、それは入力ファイル次第。\nこの数値は単純に並行処理のスレッド数だと思ったらよい。Token/分とRequest/分に配慮する。\n小さなファイルは並列数を小さめ、大きなファイルは少し大きく、という感じだと思われる。"`                                                              // 最大同時並列実行数
 	Tmp         string `json:"tmp-dir"     comment:"一時ファイルを保存するディレクトリを指定する。\n指定がない時、カレントディレクトリにtmpディレクトリを作成する。\n既にあれば、削除して再作成する。"`                                                                                                                                                     // 一時ファイルを保存するディレクトリ
 	Postfix     string `json:"postfix"     comment:"出力ファイル名の末尾に付与する文字列。"`                                                                                                                                                                                                              // 出力ファイル名の末尾に付与する文字列。空の時 "_easygpt_output" となる。
+
+	AiModel   string `json:"ai-model"      comment:"使用するAIのモデル。\n3か月くらいで新しいモデルが出るので更新するのがおすすめ。\n使用できるモデルは\ncurl -s https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY" | gojq -r ".data[].id" | grep gpt | sort\nで得られる。\n"`
+	OpenaiURL string `json:"openai-url"    comment:"OpenAIのAPIで使用するURL。\n基本的に\"https://api.openai.com/v1/chat/completions\"だが、\n将来変更されるかもしれないので設定できるようにしておく。\n"`
 }
 
 type SettingForDD struct {

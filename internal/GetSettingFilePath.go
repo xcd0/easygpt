@@ -1,12 +1,9 @@
 package internal
 
 import (
-	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/hjson/hjson-go/v4"
 	"github.com/pkg/errors"
 )
 
@@ -58,30 +55,4 @@ func GetSettingFilePathFromArgs(argsAll *ArgsAll) string {
 		return argsSetting.Setting
 	}
 	return ""
-}
-
-func CreateSettingHjsonTemplate(path string) {
-	setting := Setting{
-		Apikey:      "ここに発行したAPIキーを記述する",
-		InputDir:    "./入力ファイルがあるディレクトリのパス",
-		OutputDir:   "./出力先ディレクトリのパス",
-		Prompt:      "",
-		Postfix:     "",
-		Extension:   "",
-		Tmp:         "",
-		Concurrency: 1,
-	}
-	b, err := hjson.Marshal(setting)
-	if err != nil {
-		log.Printf("%+v", errors.Errorf("%v", err))
-	}
-	//log.Printf("b:\n%v", string(b))
-	h := string(b)
-	//log.Printf("h:\n%v", h)
-	h = h[1:]                           // hjsonの{}を削除
-	h = h[:len(h)-2] + "\n\n"           // hjsonの{}を削除
-	h = strings.ReplaceAll(h, "  ", "") // hjsonのインデントを削除
-	//log.Printf("h:\n%v", h)
-
-	OutputTextForCheck(path, h)
 }

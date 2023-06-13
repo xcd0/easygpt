@@ -45,7 +45,7 @@ type Usage struct {
 
 const (
 	openaiURL = "https://api.openai.com/v1/chat/completions"
-	aiModel   = "gpt-3.5-turbo"
+	aiModel   = "gpt-3.5-turbo-16k-0613"
 )
 
 func GetOpenAIResponse(messages *[]Message, apiKey, tmpdir string, tmpflag bool) OpenaiResponse {
