@@ -19,7 +19,7 @@ func CreateSettingHjsonTemplate(path string) {
 		Concurrency: 1,
 		Tmp:         "",
 		OpenaiURL:   "https://api.openai.com/v1/chat/completions",
-		AiModel:     "gpt-3.5-turbo-16k-0613",
+		AiModel:     "gpt-3.5-turbo-16k",
 	}
 	b, err := hjson.Marshal(setting)
 	if err != nil {
