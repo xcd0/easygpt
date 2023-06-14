@@ -1,9 +1,5 @@
 package internal
 
-type ArgsDD struct {
-	InputFiles []string `arg:"positional"         help:"非フラグ引数はファイルやディレクトリのパスであると見なす。\n                         この方法で指定されたファイル群は、引数の--output-dirの指定を無視して、\n                         指定されたファイルと同じディレクトリに、POSTFIXを付与した名前で出力される。"`
-}
-
 func GetSettingsForDD(argsAll *ArgsAll, settings []Setting) ([]SettingForDD, []string) {
 	var setting Setting
 	if len(settings) != 0 {
@@ -33,7 +29,7 @@ func GetSettingsForDD(argsAll *ArgsAll, settings []Setting) ([]SettingForDD, []s
 	} else if len(argsDD.InputFiles) > 0 {
 		// ポジショナル引数があった。
 		//log.Printf("InputFiles: %v", argsDD.InputFiles)
-		settingsfordd, files := GenerateSettingForDD(&setting.Apikey, &setting.Prompt, &setting.Postfix, &argsDD.InputFiles)
+		settingsfordd, files := GenerateSettingForDD(&setting.OpenaiURL, &setting.AiModel, &setting.Apikey, &setting.Prompt, &setting.Postfix, setting.Temperature, &argsDD.InputFiles)
 		return settingsfordd, files
 	} else {
 		return []SettingForDD{}, nil // ここには来ないはず。ここに来る意味がよくわからない。

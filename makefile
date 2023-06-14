@@ -63,6 +63,7 @@ upx:
 	until sudo apt install upx -y --fix-missing; do sleep 1; done
 
 license:
+	rm -rf licenses
 	-@go-licenses save . --save_path licenses
 	rm -rf licenses/easygpt
 

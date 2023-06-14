@@ -34,69 +34,76 @@ func GetBinDir() string {
 	return ret
 }
 
-func GetText(filepath string) (string, error) {
-	b, err := os.ReadFile(filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
+func GetText(filepath *string) (*string, error) {
+	b, err := os.ReadFile(*filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
 	if err != nil {
 		//log.Print("Error: %v, file: %v", err, filepath)
-		return "", err
+		return nil, err
 	}
-	return string(b), err
+	str := string(b)
+	return &str, nil
 }
 
-func GetTextNoError(filepath string) string {
+func GetTextNoError(filepath *string) *string {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Fatalf("%+v", err)
 		}
 	}()
 
-	b, err := os.ReadFile(filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
+	b, err := os.ReadFile(*filepath) // https://pkg.go.dev/os@go1.20.5#ReadFile
 	if err != nil {
-		panic(errors.Errorf("Error: %v, file: %v", err, filepath))
+		panic(errors.Errorf("Error: %v, file: %v", err, *filepath))
 	}
-	return string(b)
+	str := string(b)
+	return &str
 }
 
-func GetFileNameWithoutExt(path string) string {
-	return filepath.Base(path[:len(path)-len(filepath.Ext(path))])
+func GetFileNameWithoutExt(path *string) string {
+	return filepath.Base((*path)[:len(*path)-len(filepath.Ext(*path))])
 }
 
-func GetApikey(apikey, apiFile *string) error { // APIキー
+func GetApikey(apikey, apiFile *string) (*string, error) { // APIキー
+	p := "./apikey.txt"
 	if len(*apikey) != 0 {
 		// ok
-	} else if ret, err := GetText(*apiFile); err == nil {
+	} else if ret, err := GetText(apiFile); err == nil {
 		// ok
-		*apikey = ret
-	} else if ret, err = GetText("./apikey.txt"); err == nil {
+		*apikey = *ret
+	} else if ret, err = GetText(&p); err == nil {
 		// ok
-		*apikey = ret
+		*apikey = *ret
 	} else {
 		// APIキーが指定されておらず、APIキーを記載したテキストファイルのパスも与えられておらず、カレントディレクトリにもAPIキーを書いたテキストファイルがない
-		return errors.Errorf("Error: APIキーを指定してください。")
+		return apikey, errors.Errorf("Error: APIキーを指定してください。")
 	}
 	*apikey = strings.ReplaceAll(*apikey, "\n", "") // 改行コードを削除
 	*apikey = strings.ReplaceAll(*apikey, "\r", "") // 改行コードを削除
-	return nil
+	return apikey, nil
 }
 
 func GetPrompt(prompt, promptFile *string) error { // prompt
+	p := "./prompt.txt"
 	if len(*prompt) != 0 { // ok
-	} else if ret, err := GetText(*promptFile); err == nil {
-		*prompt = ret // ok
-	} else if ret, err = GetText("./prompt.txt"); err == nil {
-		*prompt = ret // ok
+	} else if ret, err := GetText(promptFile); err == nil {
+		*prompt = *ret // ok
+	} else if ret, err = GetText(&p); err == nil {
+		*prompt = *ret // ok
 	} else { // プロンプトが与えられていない。
-		return errors.Errorf("Warnig: プロンプトが与えられていません。\n        プロンプトがない場合は、入力テキストファイルがそのまま使用されます。")
+		//err := errors.Errorf("Warnig: プロンプトが与えられていません。\n        プロンプトがない場合は、入力テキストファイルがそのまま使用されます。")
+		//return err
+		return nil
 	}
 	return nil
 }
 
 func GetPostfix(postfix *string) error {
+	p := "./postfix.txt"
 	if len(*postfix) != 0 {
 		// ok
-	} else if ret, err := GetText("./postfix.txt"); err == nil {
+	} else if ret, err := GetText(&p); err == nil {
 		// ok
-		*postfix = ret
+		*postfix = *ret
 	} else {
 		// postfixがない。別に問題ない。
 	}

@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 func RunWithSetting(settings []Setting) {
@@ -47,10 +51,33 @@ func RunWithSetting(settings []Setting) {
 				defer wg.Done()
 				defer func() { <-sem }() // 処理が終わったらチャネルを解放
 
-				Ask(f, setting.InputDir, setting.OutputDir, setting.Tmp, setting.Apikey, &setting.Prompt)
+				Ask(&f, &setting.InputDir, &setting.OutputDir, &setting.Tmp, &setting.OpenaiURL, &setting.AiModel, &setting.Apikey, &setting.Prompt, setting.Temperature)
 
 			}()
 		}
 		wg.Wait()
 	}
+}
+
+func Ask(input_file, input_dir, output_dir, tmp_dir, openaiURL, aiModel, apikey, prompt *string, temperature float64) {
+	// このファイルのファイルパスから固有の文字列を生成し、一時ディレクトリの名前とする。
+	id := strings.ReplaceAll(filepath.ToSlash(strings.Replace(*input_file, *input_dir, "", 1)), "/", "-")[1:]
+	// 一時ディレクトリにこのファイル固有のディレクトリを作成する
+	id = filepath.Join(*tmp_dir, id)
+	if len(id) == 0 {
+		// なぜか文字がすべて消えた。ファイル名が\とかだったらありえる。
+		// ランダム文字列生成してディレクトリ名にする
+		uuidObj, _ := uuid.NewUUID()
+		id = filepath.Join(*tmp_dir, uuidObj.String())
+	}
+	CreateDir(id)
+	p := filepath.Join(id, "original_path.txt")
+	OutputTextForCheck(&p, input_file)
+
+	// 出力
+	outputpath := strings.Replace(*input_file, *input_dir, *output_dir, 1)
+
+	output := Question(openaiURL, aiModel, apikey, prompt, input_file, &id, temperature, true)
+
+	OutputTextForCheck(&outputpath, output)
 }

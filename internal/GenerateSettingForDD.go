@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func GenerateSettingForDD(apikey, prompt, postfix *string, inputArgFiles *[]string) ([]SettingForDD, []string) {
+func GenerateSettingForDD(openaiURL, aiModel, apikey, prompt, postfix *string, temperature float64, inputArgFiles *[]string) ([]SettingForDD, []string) {
 	// D&Dによる実行
 	// D&Dの場合、引数を舐めて、ファイルはファイルごとに実行
 	// ディレクトリは設定ありとある程度同じように実行
@@ -43,6 +43,9 @@ func GenerateSettingForDD(apikey, prompt, postfix *string, inputArgFiles *[]stri
 				Postfix:     *postfix, // 出力ファイル名の末尾に付与する文字列。空の時 "_easygpt_output" となる。
 				Tmp:         "",       // 一時ファイルを保存するディレクトリ
 				Concurrency: 1,        // 最大同時並列実行数
+				AiModel:     *openaiURL,
+				Temperature: temperature,
+				OpenaiURL:   *aiModel,
 			},
 		)
 	}

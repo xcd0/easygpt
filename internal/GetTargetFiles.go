@@ -14,6 +14,9 @@ func GetTargetFiles(dir string, extension string) []string {
 		}
 	}()
 	// 入力ディレクトリの中のテキストファイルを検索
+	if len(dir) == 0 {
+		return nil
+	}
 	fes, err := Dirwalk(dir)
 	if err != nil {
 		//log.Fatalf("Error: %v", err)

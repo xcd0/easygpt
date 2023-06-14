@@ -2,40 +2,62 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 )
 
-type path = string
+func Question(openaiURL, aiModel, apikey, prompt, input, tmpdir *string, temperature float64, tmpflag bool) *string {
+	inputText := GetTextNoError(input)
+	return QuestionByText(openaiURL, aiModel, apikey, prompt, inputText, tmpdir, temperature, tmpflag)
+}
 
-func Question(apikey string, prompt *string, input path, tmpdir path, tmpflag bool) string {
-	in := GetTextNoError(input)
+func QuestionByText(openaiURL, aiModel, apikey, prompt, inputText, tmpdir *string, temperature float64, tmpflag bool) *string {
+	//log.Printf("temperature:%v", temperature)
+	messages := []Message{}
+	if len(*prompt) > 0 {
+		messages = append(messages,
+			Message{
+				Role:    "system",
+				Content: *prompt,
+			})
+	}
+	if len(*inputText) > 0 {
+		messages = append(messages,
+			Message{
+				Role:    "user",
+				Content: *inputText,
+			})
+	}
 
-	question := fmt.Sprintf("%v\n%v", *prompt, in)
+	if len(messages) == 0 {
+		fmt.Println("入力テキスト空でした。")
+		os.Exit(0)
+	}
 
 	if tmpflag {
-		OutputTextForCheck(filepath.Join(tmpdir, "input.txt"), question)
+		p := filepath.Join(*tmpdir, "input.txt")
+		q := fmt.Sprintf("%v", messages)
+		OutputTextForCheck(&p, &q)
 	}
+	//log.Printf("%v", messages)
 
-	messages := []Message{
-		Message{
-			Role:    "user",
-			Content: question,
-		},
-	}
-
-	response := GetOpenAIResponse(&messages, apikey, tmpdir, tmpflag)
+	response := GetOpenAIResponse(&messages, openaiURL, aiModel, apikey, tmpdir, temperature, tmpflag)
 	//log.Printf("response: %v", response)
 	//log.Printf(": %v", response)
+	if response == nil {
+		return nil
+	}
 
-	if len(response.Choices) == 0 {
+	if len((*response).Choices) == 0 {
 		//log.Printf("Error: no response.")
 		//log.Printf("       %v", response)
-		return ""
+		return nil
 	}
 
-	output := response.Choices[0].Messages.Content
+	output := (*response).Choices[0].Messages.Content
 	if tmpflag {
-		OutputTextForCheck(filepath.Join(tmpdir, "output.txt"), output)
+		p := filepath.Join(*tmpdir, "output.txt")
+		OutputTextForCheck(&p, &output)
 	}
-	return output
+	return &output
 }

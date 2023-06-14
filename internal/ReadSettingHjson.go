@@ -14,16 +14,16 @@ func Unmarshal(b []byte) Setting {
 	return setting
 }
 
-func ReadSettingHjson(path string) []Setting {
+func ReadSettingHjson(path *string) []Setting {
 
 	if hjsonStr, err := GetText(path); err != nil {
 		log.Printf("Error: %v", err)
-		log.Printf("設定ファイルが不正です。: %v", path)
+		log.Printf("設定ファイルが不正です。: %v", *path)
 		return []Setting{}
 	} else {
-		b := []byte(hjsonStr)
+		b := []byte(*hjsonStr)
 
-		//hjsonStr = fmt.Sprintf("{%v}", hjsonStr)
+		//*hjsonStr = fmt.Sprintf("{%v}", *hjsonStr)
 		setting := Unmarshal(b)
 		//log.Printf("%v", setting)
 

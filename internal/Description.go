@@ -103,14 +103,20 @@ $ ./easygpt                                                                \
     --postfix        "_easygpt_output"                                     \  
     --extension      ""                                                    \  
     --tmp-dir        "./tmpdir"                                            \  
-    --concurrency    1  
+    --concurrency    1                                                     \  
+    --temperture     0.7  
 
 ### 例
 
-./inputに英文テキストファイルがあるとして、それらをまとめて和訳させる例。
+#### 自己紹介させる例
+
+$ ./easygpt -i 自己紹介してください。 -a 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
+こんにちは、私はAIです。私はOpenAIが開発した自然言語処理モデルです。私の目的は、ユーザーが質問や要求をすると、最善の回答や応答を提供することです。私は様々なトピックについての情報を持っており、文法やスタイルの修正も行うことができます。どのようにお手伝いできますか？
+
+#### ./inputに英文テキストファイルがあるとして、それらをまとめて和訳させる例。
 ./outputに出力が保存される。
 
-$./easygpt \
+$ ./easygpt \
 	--input-dir ./input \
 	--output-dir ./output \
 	--api-key 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 \

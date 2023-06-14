@@ -14,8 +14,9 @@ import (
 )
 
 type OpenaiRequest struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
+	Model       string    `json:"model"`
+	Messages    []Message `json:"messages"`
+	Temperature float64   `json:"temperature"`
 }
 
 type OpenaiResponse struct {
@@ -43,62 +44,84 @@ type Usage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-const (
-	openaiURL = "https://api.openai.com/v1/chat/completions"
-	aiModel   = "gpt-3.5-turbo-16k-0613"
-)
+// Questionからしか呼ばないつもり。
+func GetOpenAIResponse(messages *[]Message, openaiURL, aiModel, apiKey, tmpdir *string, temperature float64, tmpflag bool) *OpenaiResponse {
+	var req *http.Request = CreateHttpRequest(messages, openaiURL, aiModel, apiKey, tmpdir, temperature, tmpflag)
+	if req == nil {
+		return nil
+	}
 
-func GetOpenAIResponse(messages *[]Message, apiKey, tmpdir string, tmpflag bool) OpenaiResponse {
-	var req *http.Request = CreateHttpRequest(messages, apiKey, tmpdir, tmpflag)
+	//log.Printf("\nreq:%v\n\n*tmpdir:%v\n\ntmpflag:%v\n\n", req, *tmpdir, tmpflag)
 
 	var body []byte = GetResponseBody(req, tmpdir, tmpflag)
 
-	return func(body []byte, messages *[]Message) OpenaiResponse {
+	return func(body []byte, messages *[]Message) *OpenaiResponse {
 		var response OpenaiResponse
 		if err := json.Unmarshal(body, &response); err != nil {
 			log.Printf("Error: %v", err.Error())
-			return OpenaiResponse{}
+			return nil
 		}
 		if len(response.Choices) == 0 {
 			//log.Printf("Error: レスポンスがありませんでした。")
 			//log.Printf("       %v", response)
-			return OpenaiResponse{}
+			return nil
 		}
 		*messages = append(*messages, Message{
 			Role:    "assistant",
 			Content: response.Choices[0].Messages.Content,
 		})
-		return response
+		return &response
 	}(body, messages)
 }
 
-func CreateHttpRequest(messages *[]Message, apiKey, tmpdir string, tmpflag bool) *http.Request {
+func CreateHttpRequest(messages *[]Message, openaiURL, aiModel, apiKey, tmpdir *string, temperature float64, tmpflag bool) *http.Request {
 	requestBody := OpenaiRequest{
-		Model:    aiModel,
-		Messages: *messages,
+		Model:       *aiModel,
+		Messages:    *messages,
+		Temperature: temperature,
 	}
 
 	requestJSON, _ := json.Marshal(requestBody)
 
 	if tmpflag {
-		OutputTextForCheck(filepath.Join(tmpdir, "request.json"), JsonFormat(requestJSON))
+		p := filepath.Join(*tmpdir, "request.json")
+		j := JsonFormat(requestJSON)
+		OutputTextForCheck(&p, &j)
 	}
 
-	req, err := http.NewRequest("POST", openaiURL, bytes.NewBuffer(requestJSON))
+	if len(*openaiURL) == 0 {
+		fmt.Println("URL指定がありません。")
+		return nil
+	}
+	if len(*aiModel) == 0 {
+		fmt.Println("AIのモデル指定がありません。")
+		return nil
+	}
+	if len(*apiKey) == 0 {
+		fmt.Println("APIキー指定がありません。")
+		return nil
+	}
+
+	req, err := http.NewRequest("POST", *openaiURL, bytes.NewBuffer(requestJSON))
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", apiKey))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", *apiKey))
 	return req
 }
 
-func GetResponseBody(req *http.Request, tmpdir string, tmpflag bool) []byte {
+func GetResponseBody(req *http.Request, tmpdir *string, tmpflag bool) []byte {
 	client := &http.Client{}
-	//log.Printf("Request: %v", *req)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Error: %v", err)
+	}
+
+	if resp == nil {
+		log.Printf("レスポンスがnilです。")
+		log.Printf("Request: %v", *req)
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -134,10 +157,10 @@ func GetResponseBody(req *http.Request, tmpdir string, tmpflag bool) []byte {
 		}
 	}()
 
-	j := JsonFormat(body)
-	//log.Printf("response body:\n%v", j)
 	if tmpflag {
-		OutputTextForCheck(filepath.Join(tmpdir, "response.json"), j)
+		p := filepath.Join(*tmpdir, "response.json")
+		j := JsonFormat(body)
+		OutputTextForCheck(&p, &j)
 	}
 	return body
 }
