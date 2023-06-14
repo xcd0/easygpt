@@ -8,8 +8,8 @@ import (
 )
 
 type ArgsSetting struct {
-	CreateSetting string `arg:"--create-setting"   help:"設定ファイルの雛形を生成する。\n"`
-	Setting       string `arg:"--setting"          help:"設定ファイルを指定する。\n                         指定がなければカレントディレクトリか、ホームディレクトリか、実行ファイルのあるディレクトリを探す。\n                         探すファイル名は'easygpt.hjson'、'.easygpt.hjson'、'.easygpt'の3つ。\n"`
+	CreateSetting []string `arg:"--create-setting"   help:"設定ファイルの雛形を生成する。\n"`
+	Setting       string   `arg:"--setting"          help:"設定ファイルを指定する。\n                         指定がなければカレントディレクトリか、ホームディレクトリか、実行ファイルのあるディレクトリを探す。\n                         探すファイル名は'easygpt.hjson'、'.easygpt.hjson'、'.easygpt'の3つ。\n"`
 }
 
 func GetSettingFilePath() (string, error) {
@@ -34,25 +34,4 @@ func GetSettingFilePath() (string, error) {
 	err := errors.Errorf("設定ファイルが見つかりませんでした。")
 	//log.Printf("Debug: %v", err)
 	return "", err
-}
-
-func GetSettingFilePathFromArgs(argsAll *ArgsAll) string {
-
-	//log.Printf("--------------------------------------")
-	argsSetting := ArgsSetting{
-		CreateSetting: argsAll.CreateSetting,
-		Setting:       argsAll.Setting,
-	}
-
-	//log.Printf("argsSetting:%v", argsSetting)
-	//arg.MustParse(&argsSetting)
-	//log.Printf("--------------------------------------")
-	if len(argsSetting.CreateSetting) > 0 {
-		// 雛形生成
-		CreateSettingHjsonTemplate(argsSetting.CreateSetting)
-		return ""
-	} else if len(argsSetting.Setting) > 0 {
-		return argsSetting.Setting
-	}
-	return ""
 }

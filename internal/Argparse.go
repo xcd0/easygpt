@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/alexflint/go-arg"
 )
@@ -30,6 +32,8 @@ type ArgsAll struct {
 		Tmpdir      string `arg:"--tmp-dir"          help:"一時ファイルを保存するディレクトリを指定する。\n                         指定がない時、カレントディレクトリにtmpディレクトリを作成する。\n                         既にあれば、削除して再作成する。\n"`
 		Concurrency int    `arg:"--concurrency"      help:"並列処理数を指定する。初期値1。\n                         APIの Rate Limitに引っかからない程度に並列したいところ。しかし、それは入力ファイル次第。\n                         この数値は単純に並行処理のスレッド数だと思ったらよい。\n                         Token/分とRequest/分に配慮する。\n                         小さなファイルは並列数を小さめ、大きなファイルは少し大きく、という感じだと思われる。\n"`
 	} */
+
+	Readme bool `arg:"--readme" help:"詳しい説明文を出力する。長いため\"./easygpt --readme | less\"などで見るのがおすすめ。"`
 }
 
 // 戻り値は引数処理結果のsettingと引数にあったファイルのリスト
@@ -43,6 +47,11 @@ func Argparse() ([]Setting, []SettingForDD) {
 	//log.Printf("argsAll:%v", argsAll)
 	//log.Printf("--------------------------------------")
 
+	if argsAll.Readme {
+		ShowDescription()
+		os.Exit(0)
+	}
+
 	// 引数解析は段階を踏む
 	// ①設定ファイルからの読み込み
 	// ②引数からの設定の読み込み
@@ -50,20 +59,30 @@ func Argparse() ([]Setting, []SettingForDD) {
 
 	// まず設定ファイルの指定があるかどうか
 
-	if settingFilePath := GetSettingFilePathFromArgs(&argsAll); len(settingFilePath) > 0 {
-		// 引数で設定ファイルが指定された
-		settings = ReadSettingHjson(settingFilePath)
-		//log.Printf("Debug: 設定ファイルが見つかりました。 : %v", settingFilePath)
-		//log.Printf("--------------------------------------")
-	} else if settingFilePath, err := GetSettingFilePath(); len(settingFilePath) > 0 {
-		if err != nil {
-			log.Printf("%v", err)
-		} else {
-			// 既定の設定ファイルがあった。
-			settings = ReadSettingHjson(settingFilePath)
-			//log.Printf("Debug: 設定ファイルが見つかりました。 : %v", settingFilePath)
+	// 引数で、設定ファイルの雛形を生成する指示があるか。あれば生成して終了。
+	if argsAll.CreateSetting != nil {
+		// 雛形生成
+		CreateSettingHjsonTemplate(argsAll.CreateSetting)
+		fmt.Println("設定ファイルの雛形を以下に出力しました。")
+		fmt.Println("出力した設定ファイルの雛形は編集が必要です。")
+		for _, p := range argsAll.CreateSetting {
+			fmt.Printf("%v\n", p)
 		}
+		os.Exit(0)
+	}
+	// 引数で設定ファイル指定があるか。
+	var err error
+	if len(argsAll.Setting) > 0 {
+		// 引数で設定ファイルが指定された
+		settings = ReadSettingHjson(argsAll.Setting)
+		//log.Printf("Debug: 設定ファイルが見つかりました。 : %v", argsAll.Setting)
 		//log.Printf("--------------------------------------")
+	} else if argsAll.Setting, err = GetSettingFilePath(); err != nil {
+		log.Printf("%v", err)
+	} else if len(argsAll.Setting) > 0 {
+		// 既定の設定ファイルがあった。
+		settings = ReadSettingHjson(argsAll.Setting)
+		//log.Printf("Debug: 設定ファイルが見つかりました。 : %v", argsAll.Setting)
 	} else {
 		//log.Printf("debug")
 		// 設定ファイルがなかった。

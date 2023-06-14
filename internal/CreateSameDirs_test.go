@@ -10,7 +10,6 @@ func TestCreateSameDirsOn(t *testing.T) {
 	log.SetFlags(log.Ltime | log.Lshortfile) // ログの出力書式を設定する
 
 	setting := Setting{
-		Apikey:    GetTextNoError("./for_test/apikey.txt"),
 		InputDir:  "./for_test/input",
 		OutputDir: "./for_test/output",
 		Prompt:    "aaa",

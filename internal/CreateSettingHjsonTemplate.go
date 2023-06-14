@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func CreateSettingHjsonTemplate(path string) {
+func CreateSettingHjsonTemplate(paths []string) {
 	setting := Setting{
 		Apikey:      "ここに発行したAPIキーを記述する",
 		InputDir:    "./入力ファイルがあるディレクトリのパス",
@@ -33,5 +33,7 @@ func CreateSettingHjsonTemplate(path string) {
 	h = strings.ReplaceAll(h, "  ", "") // hjsonのインデントを削除
 	//log.Printf("h:\n%v", h)
 
-	OutputTextForCheck(path, h)
+	for _, path := range paths {
+		OutputTextForCheck(path, h)
+	}
 }

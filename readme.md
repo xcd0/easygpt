@@ -1,101 +1,138 @@
 # easygpt
 
-テキストファイルをchatgptのapiに投げる。  
-翻訳や、ソースコードにコメントを付けさせたりと、使い方次第で色々できる。
+chatgptのapiを使ってテキストファイルをまとめて一括で処理させるアプリ。  
+翻訳や、ソースコードにコメントを付けさせたりと、使い方次第で色々できる。  
 
 ## install
 
 ```sh
 go install github.com/xcd0/easygpt@latest
 ```
-しかし現状installしても、微妙に使いずらいプログラムになっている。  
-`cp $(which easygpt) .` とかでバイナリを処理したいディレクトリに持ってくるか、  
-コマンドライン引数をちゃんと設定したshellscriptを作成して使用したほうがよい。  
 
-以下の説明はカレントディレクトリにeashgptバイナリがあるという前提になっている。  
-将来的にはパスが通ったディレクトリにeasygptがあるという前提の説明に書き換える必要がありそう。  
-以下のテキストの場所も、環境変数などを参照す流ような方法にしたほうがいいと思う。  
+## 準備
 
-## 使い方
+設定ファイルの雛形を生成し、それを編集して設定ファイルを作成する。  
+設定ファイル無しでも実行可能ではあるが、
 
-* 引数にオプションあり引数(--key valuのような引数)とオプションなしの引数がある。
-* オプションなしの引数がある場合、オプションありの引数のいくつかを無視する。
-* オプションなし引数のみによる実行について
-	* この実行方法は、実行ファイルへファイル群をD&Dして実行することを想定している。
-		* この時、入力ファイルに`--postfix`で指定した文字列を付与したテキストファイルに出力する。
-		* このpostfixは`find . -name "postfix"` のように検索で抽出できるようにする目的で付与する。
-		* `--postfix` が空の時、入力ファイルに上書きしてしまうことを防ぐため、勝手に`_easygpt_output`を付与する。
-			* どうしても上書きしたいときは `--postfix *` のように設定する。
-	* この時、以下のディレクトリのいずれかに、設定ファイルがあることを必須とする。
-		1. カレントディレクトリ
-		2. ホームディレクトリ
-		3. 実行ファイルのあるディレクトリ
-	* 設定ファイルの名前は`easygpt.hjson`、`.easygpt.hjson`、`.easygpt`、のいずれかとする。
-	* 設定ファイルは`./easygpt --create-setting ./easygpt.hjson` のようにして雛形を生成できる。生成した設定ファイルは編集が必要である。
-	* オプションなし引数があるとき、オプションあり引数の`input-dir` などは無視される。
-* オプションあり引数ありの実行について
+1. 雛形の生成。
 
-オプションあり引数  | 値              | 設定ファイルor<br>引数での設定が必須か | 説明 
-------------------- | --------------- |----------------------------------------|------------------
---help              | なし            | -                                      | ヘルプを表示する。<br>他の引数や設定ファイルを全て無視する。
---create-setting    | 雛形生成先パス  | -                                      | 設定の雛形を生成する。<br>他の引数や設定ファイルを全て無視する。
---setting           | 設定ファイルパス| -                                      | 設定ファイルを指定する。<br>他の引数を設定するとその値で上書きする。
---input-dir         | INPUT-DIR       | 必須                                   | オプションなし引数がない時、これは設定が必須になる。
---output-dir        | OUTPUT-DIR      | 必須                                   | 同上。(*)ファイルによる指定と、直接値を指定は片方でよい。<br>両方指定された場合、直接値を優先する。
---apikey-file       | APIKEY-FILE     | 必須(*)                                | 同上。
---apikey            | APIKEY          | 必須(*)                                | 同上。
---prompt-file       | PROMPT-FILE     | 必須(*)                                | 同上。
---prompt            | PROMPT          | 必須(*)                                | 同上。
---postfix           | POSTFIX         | 任意                                   | 特に設定不要。
---extension         | EXTENSION       | 任意                                   | 特に設定不要。
---tmp-dir           | TMP-DIR         | 任意                                   | 特に設定不要。
---concurrency       | CONCURRENCY     | 任意                                   | 特に設定不要。
+```sh
+$ ./easygpt --create-setting
+```
 
+のように実行するとカレントディレクトリに `eagygpt.hjson` が生成される。  
 
+2. 設定ファイルの編集。
+
+* `apikey` の部分にAPIキーを書き込む。  
+	例) `apikey: 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`  
+	上記は例の為の無効なAPIキーであるので、自分で発行する事。  
+	APIキーは https://platform.openai.com/account/api-keys から発行できる。
+
+* `prompt` の部分に入力テキストファイルの前に与えたい文字列を記載する。  
+	例) 英文テキストファイルを翻訳してほしい場合、`prompt: 以下を和訳してください。` のように書く。  
+	複数行書きたいとき、`\n`で改行するか、以下のヒアドキュメント形式で記載する。  
+	```
+	prompt:  
+	'''  
+	このような書式で、  
+	複数行書くことができる。  
+	'''  
+	```
+
+他の引数については、設定ファイルのコメントを読み、必要に合わせて記述する。  
+
+3. 設定ファイルの配置。
+
+以下の仕様に従って設定ファイルが探索される。  
+基本的にはカレントディレクトリに、easygpt.hjsonを配置すればよい。
+
+設定ファイルの名前の既定値は、  
+* easygpt.hjson  
+* .easygpt.hjson  
+* .easygpt  
+の3種類。  
+これ以外の名前の設定ファイルを使用したい場合、引数`--setting`で設定できる。  
+
+設定の既定の位置は、  
+* カレントディレクトリ  
+* ホームディレクトリ  
+* 実行ファイルと同じディレクトリ  
+の3か所。  
+設定ファイルの探索は、この順番で行われる。  
+従って、カレントディレクトリに存在すれば、ホームディレクトリの設定ファイルは無視される。  
 
 ## 使い方1 D&D
 
-1. 実行ファイルと同じディレクトリに2つテキストファイルを作成する。
-	* `./apikey.txt`
-		* APIキーを書き込む。  
-		例) `echo "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" > ./apikey.txt`
-            * このAPIキーは無効なのでちゃんと自分のアカウントで発行して設定すること。
-		* APIキーは https://platform.openai.com/account/api-keys から発行できる。
-	* `./prompt.txt`
-		* これはなくてもよい。
-		* 入力テキストファイルの前に与えたい文字列を記載する。
-			* 例) 英文テキストファイルを翻訳してほしい場合、`./prompt.txt`に`以下を和訳してください。`と書く。
+設定ファイルがあれば、以下のように使用できる。  
 
-1. gptに投げたいテキストファイル、またはそれが含まれるディレクトリを`easygpt.exe`の実行ファイルにドラッグアンドドロップする。
-1. 投げたファイルと同じディレクトリに、入力ファイルに`_easygpt_output`を付与した名前で処理結果を出力する。
-
+1. gptに投げたいテキストファイル、またはそれが含まれるディレクトリを、 `easygpt`の実行ファイルにドラッグアンドドロップす
+る。
+1. 投げたファイルと同じディレクトリに、入力ファイルに`_easygpt_output`を付与した名前で処理結果を出力される。
 
 ## 使い方2 コマンドラインから実行
 
-詳しくは`./easygpt -h`を参照
+設定ファイルの設定をコマンドラインから指定できる。  
+既定のパスにある設定ファイルに、設定されている値については、引数を省略できる。  
+コマンドライン引数が設定されていた場合、設定ファイルの値をコマンドライン引数の値で上書きする。  
+設定できる引数が多い為、基本的に設定ファイルを使用する事をお勧めする。  
 
-1. ヘルプを見ながら引数を設定する。
+引数には `--key value` 形式のフラグ引数と、そうでない非フラグ引数がある。  
+* フラグ引数は、優先度があり、特定の引数を使用した場合、他の引数を無視する場合がある。  
+  例えば、`--create-setting` があれば、他の引数を無視して、設定ファイルの雛形を生成した後終了する。  
+  value を空にしたい場合を除いて、""で囲む必要はない。  
+* 非フラグ引数は、入力ファイルと見なして処理される。  
+  ディレクトリを指定した場合、そのディレクトリを再帰的に探索して全てのファイルを入力ファイルとする。  
 
-### 例
-
-./inputに英文テキストファイルがあるとして、それらをまとめて和訳させる例。
+引数は順不同。  
+全ての引数を設定すると以下の例のようになる。  
+`#` の後ろはコメント  
+これはあくまで例にすぎず、実際には`--help`が優先されてヘルプテキストが出力される。  
 
 ```sh
-$ ./easygpt \
-	--input-dir "./input" \
-	--output-dir "./output" \
-	--api-key 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 \
-	--prompt "以下を和訳してください。" 
+$ ./easygpt                                                                \
+                     "./input_1.txt" "./input_2.txt"                       \  # 非フラグ引数で入力ファイル指定
+                     "./input_dir_1" "./inputdir_2"                        \  # 非フラグ引数で入力ファイルのあるディレクトリ指定
+    --create-setting "./easygpt.hjson"                                     \  # 設定ファイルの雛形を生成
+    --setting        "./easygpt.hjson"                                     \  # 読み込む設定ファイルのパスを指定
+    --input-dir      "./inputdir"                                          \  # 入力ディレクトリ指定
+    --output-dir     "./outputdir"                                         \  # 出力ディレクトリ指定
+    --apikey-file    "./apikey.txt"                                        \  # APIキーを書いたテキストファイル指定
+    --apikey         "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" \  # APIキーを直接指定
+    --prompt-file    "./prompt.txt"                                        \  # プロンプトを書いたファイル指定
+    --prompt         "以下を和訳してください。"                              \  # プロンプトを直接指定
+    --postfix        "_easygpt_output"                                     \  # 出力ファイルのファイル名の末尾に付与する文字列指定
+    --extension      ""                                                    \  # 入力ファイルを指定の拡張子に制限する
+    --tmp-dir        "./tmpdir"                                            \  # 処理で使用する一時ディレクトリの出力先指定
+    --concurrency    1                                                     \  # 並行処理数の指定
+    --readme                                                                  # 詳しい説明文の出力
+    --help                                                                    # ヘルプテキストの出力
 ```
 
-## help
+引数の詳細については `./easygpt -h` で出力されるヘルプテキストを参照。  
+
+以下は`./input`に英文テキストファイルがあるとして、それらをまとめて和訳させる例。
 
 ```
-$ ./easygpt -h
-this program does this and that
-Usage: easygpt [--input-dir INPUT-DIR] [--output-dir OUTPUT-DIR] [--api-file API-FILE] [--api-key API-KEY] [--prompt-file PROMPT-FILE] [--pr
-ompt PROMPT] [--postfix POSTFIX] [--target-extension TARGET-EXTENSION] [--tmp-dir TMP-DIR] [--concurrency CONCURRENCY] [INPUTFILES [INPUTFIL
-ES ...]]
+$./easygpt \
+    --input-dir ./input \
+    --output-dir ./output \
+    --api-key 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 \
+    --prompt 以下を和訳してください。
+```
+
+例えば、設定ファイル`./easygpt.hjson`にAPIキーが設定されていた場合、上記の引数`--api-key`は省略できる。  
+
+## ヘルプ
+
+```sh
+$ ./easygpt --help
+# easygpt
+
+chatgptのapiを使ってテキストファイルをまとめて一括で処理させるアプリ。
+翻訳や、ソースコードにコメントを付けさせたりと、使い方次第で色々できる。
+
+Usage: easygpt [--create-setting CREATE-SETTING] [--setting SETTING] [--input-dir INPUT-DIR] [--output-dir OUTPUT-DIR] [--apikey-file APIKEY-FILE] [--apikey APIKEY] [--prompt-file PROMPT-FILE] [--prompt PROMPT] [--postfix POSTFIX] [--extension EXTENSION] [--tmp-dir TMP-DIR] [--concurrency CONCURRENCY] [--readme] [INPUTFILES [INPUTFILES ...]]
 
 Positional arguments:
   INPUTFILES             非フラグ引数はファイルやディレクトリのパスであると見なす。
@@ -103,6 +140,13 @@ Positional arguments:
                          指定されたファイルと同じディレクトリに、POSTFIXを付与した名前で出力される。
 
 Options:
+  --create-setting CREATE-SETTING
+                         設定ファイルの雛形を生成する。
+
+  --setting SETTING      設定ファイルを指定する。
+                         指定がなければカレントディレクトリか、ホームディレクトリか、実行ファイルのあるディレクトリを探す。
+                         探すファイル名は'easygpt.hjson'、'.easygpt.hjson'、'.easygpt'の3つ。
+
   --input-dir INPUT-DIR
                          入力テキストファイルのあるディレクトリパス。
                          再帰的にファイルを検索して全て処理する。
@@ -111,10 +155,11 @@ Options:
                          出力テキストファイルのあるディレクトリパス。
                          input-dirのディレクトリと同じ構造でサブディレクトリを作成する。
 
-  --api-file API-FILE    テキストファイルによってAPIキーを指定する。
+  --apikey-file APIKEY-FILE
+                         テキストファイルによってAPIキーを指定する。
                          この指定がない時、カレントディレクトリの./apikey.txtがあればそれを使用する。
 
-  --api-key API-KEY      APIキーを直接指定する。
+  --apikey APIKEY        APIキーを直接指定する。
                          この指定がある時、--api-fileによる指定を無視する。
 
   --prompt-file PROMPT-FILE
@@ -130,7 +175,7 @@ Options:
   --postfix POSTFIX      出力ファイル名の末尾に付与する文字列。
                          空の時 _easygpt_output となる。
 
-  --target-extension TARGET-EXTENSION
+  --extension EXTENSION
                          入力として使用したいテキストファイルの拡張子。
                          指定なしの時すべて使用する。
                          拡張子のドットを含めて.mdのように指定する。
@@ -146,6 +191,7 @@ Options:
                          Token/分とRequest/分に配慮する。
                          小さなファイルは並列数を小さめ、大きなファイルは少し大きく、という感じだと思われる。
 
+  --readme               詳しい説明文を出力する。長いため"./easygpt --readme | less"などで見るのがおすすめ。
   --help, -h             display this help and exit
 ```
 

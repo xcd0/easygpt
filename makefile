@@ -74,4 +74,5 @@ install-go-licenses:
 install-commitlint:
 	go install github.com/conventionalcommit/commitlint@latest
 
-
+clean:
+	rm easygpt easygpt.exe easygpt_mac
