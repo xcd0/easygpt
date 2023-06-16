@@ -110,10 +110,10 @@ func GetPostfix(postfix *string) error {
 	return nil
 }
 
-func GetInputDir(inputDir *string) error { // 入出力テキストファイルディレクトリパス
+func CheckInputDir(inputDir *string) error { // 入出力テキストファイルディレクトリパス
 	var err error
 	if len(*inputDir) == 0 {
-		return errors.Errorf("Error: 入出力ディレクトリを指定してください。")
+		return errors.Errorf("Error: 引数または設定ファイルで入出力ディレクトリを指定してください。")
 	}
 	if *inputDir, err = filepath.Abs(*inputDir); err != nil {
 		return errors.Errorf("Error: 入力ディレクトリの指定が不正です。\n       指定されたディレクトリパス: %v", *inputDir)
@@ -121,10 +121,10 @@ func GetInputDir(inputDir *string) error { // 入出力テキストファイル�
 	return nil
 }
 
-func GetOutputDir(outputDir *string) error { // 入出力テキストファイルディレクトリパス
+func CheckOutputDir(outputDir *string) error { // 入出力テキストファイルディレクトリパス
 	var err error
 	if len(*outputDir) == 0 {
-		return errors.Errorf("Error: 入出力ディレクトリを指定してください。")
+		return errors.Errorf("Error: 引数または設定ファイルで入出力ディレクトリを指定してください。")
 	}
 	if *outputDir, err = filepath.Abs(*outputDir); err != nil {
 		return errors.Errorf("Error: 出力ディレクトリの指定が不正です。\n       指定されたディレクトリパス: %v", *outputDir)

@@ -23,7 +23,7 @@ func TestCreateSameDirsOn(t *testing.T) {
 		}
 	}
 
-	CreateSameDirsOn(setting.OutputDir, setting.InputDir)
+	CreateSameDirsOn(setting.InputDir, setting.OutputDir)
 
 	ifes, _ := Dirwalk(setting.InputDir)
 	ofes, _ := Dirwalk(setting.OutputDir)

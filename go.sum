@@ -1,7 +1,11 @@
+cloudeng.io/algo v0.0.0-20230605195508-64e060913bb0 h1:xuPmarFbVwUolM0AzS4pSC52n2+c8A8BCFRRLBNw7Yo=
+cloudeng.io/algo v0.0.0-20230605195508-64e060913bb0/go.mod h1:80eC8gNGsJP8ZBw+xCIh1kIpt77az1W7fJ+zqLRiE64=
 github.com/alexflint/go-arg v1.4.3 h1:9rwwEBpMXfKQKceuZfYcwuc/7YY7tWJbFsgG5cAU/uo=
 github.com/alexflint/go-arg v1.4.3/go.mod h1:3PZ/wp/8HuqRZMUUgu7I+e1qcpUbvmS258mRXkFH4IA=
 github.com/alexflint/go-scalar v1.1.0 h1:aaAouLLzI9TChcPXotr6gUhq+Scr8rl0P9P4PnltbhM=
 github.com/alexflint/go-scalar v1.1.0/go.mod h1:LoFvNMqS1CPrMVltza4LvnGKhaSpc3oyLEBUZVhhS2o=
+github.com/cloudengio/go.pkgs v0.0.0-20230605195508-64e060913bb0 h1:Og2NHyOGQMFo7E1K9q1vHlyhVFdCsedzfdShbBIMyFQ=
+github.com/cloudengio/go.pkgs v0.0.0-20230605195508-64e060913bb0/go.mod h1:F06qYndTL3ObF2Tc5nv+eduTFseb5qgCb/ZpYAlKT+4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

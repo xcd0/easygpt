@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetSettingFilePath() (string, error) {
+func GetSettingFilePath() (*string, error) {
 	dirs := []string{GetCurrentDir(), GetHomeDir(), GetBinDir()}
 	settingFileNames := []string{
 		"easygpt.hjson",
@@ -22,11 +22,11 @@ func GetSettingFilePath() (string, error) {
 			//log.Printf("Debug: check path : %v", p)
 			if _, err := os.Stat(p); err == nil {
 				// 設定ファイルがあった。
-				return p, nil
+				return &p, nil
 			}
 		}
 	}
 	err := errors.Errorf("設定ファイルが見つかりませんでした。")
 	//log.Printf("Debug: %v", err)
-	return "", err
+	return nil, err
 }

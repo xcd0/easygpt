@@ -12,11 +12,11 @@ func AbsPath(path *string) {
 	*path = filepath.Clean(*path)
 }
 
-func CreateSameDirsOn(target_dir string, ref_dir string) {
+// ref_dirの子ディレクトリをtarget_dirに作成する。
+func CreateSameDirsOn(ref_dir, target_dir string) {
 
 	//fmt.Printf("%+v", errors.Errorf("debug"))
 
-	// ref_dirの子ディレクトリをtarget_dirに作成する。
 	// ref_dirの子ディレクトリ一覧からref_dirのパス文字列を削除して、target_dirをくっつける
 	AbsPath(&target_dir)
 	AbsPath(&ref_dir)

@@ -9,48 +9,53 @@ chatgptのapiを使ってテキストファイルをまとめて一括で処理�
 go install github.com/xcd0/easygpt@latest
 ```
 
-## 単純な使用例
+## 単純な使用例 (AIに文字列を与えて出力を得る)
 
-先に`.bashrc`などにAPIキーを環境変数`OPENAI_API_KEY`に設定しておく。  
-このAPIキーは例の為の無効なAPIキーなので、自分で有効なAPIキーを発行して、設定すること。  
+OpenAIのAPIキーを環境変数`OPENAI_API_KEY`に設定する。  
+下記のAPIキーは例の為の無効なAPIキーなので、自分で有効なAPIキーを発行して、設定すること。  
+APIキーは https://platform.openai.com/account/api-keys から発行できる。
+発行したAPIキーを`.bashrc`などに設定する。
 ```sh
 $ export OPENAI_API_KEY=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
 $ echo export OPENAI_API_KEY=$OPENAI_API_KEY >> .bashrc
 ```
 
-APIキーさえ設定していれば、あとはインストールして、設定ファイルを設定し、実行する。
+あとはeasygptをインストールして、実行すればよい。
 
 ```sh
 $ go install github.com/xcd0/easygpt@latest
-$ easygpt -c
-$ echo "apikey: $OPENAI_API_KEY" >> ./easygpt.hjson
 $ easygpt -i "Say this is test."
 this is test.
 ```
 
+## 複数ファイル一括処理
 
-## 準備
+AIに複数のテキストファイルを一括で処理させる。  
+
+### 準備
 
 設定ファイルの雛形を生成し、それを編集して設定ファイルを作成する。  
-設定ファイル無しでも実行可能ではあるが、
 
 1. 雛形の生成。
 
 ```sh
-$ ./easygpt --create-setting
+$ easygpt --create-setting
 ```
 
-のように実行するとカレントディレクトリに `eagygpt.hjson` が生成される。  
+のように実行すると、カレントディレクトリに `eagygpt.hjson` が生成される。  
+`easygpt -c`でも良い。
 
 2. 設定ファイルの編集。
+* APIキーの設定
+	* 環境変数`OPENAI_API_KEY`に設定しておくのがおすすめ。この場合設定ファイルに書き込む必要はない。
+	* 設定ファイルの`apikey` の部分にAPIキーを書き込んでもよい。  
+		例) `apikey: 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`  
+		上記のAPIキーは無効なAPIキーであるので、自分で発行する事。  
+		APIキーは https://platform.openai.com/account/api-keys から発行できる。
 
-* `apikey` の部分にAPIキーを書き込む。  
-	例) `apikey: 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`  
-	上記は例の為の無効なAPIキーであるので、自分で発行する事。  
-	APIキーは https://platform.openai.com/account/api-keys から発行できる。
-
-* `prompt` の部分に入力テキストファイルの前に与えたい文字列を記載する。  
-	例) 英文テキストファイルを翻訳してほしい場合、`prompt: 以下を和訳してください。` のように書く。  
+* 設定ファイルの`prompt` の部分に、入力テキストファイルの前に与えたい文字列を記載する。  
+	例) 英文テキストファイルを翻訳してほしい場合、
+	`prompt: 以下を和訳してください。` のように書く。  
 	複数行書きたいとき、`\n`で改行するか、以下のヒアドキュメント形式で記載する。  
 	```
 	prompt:  
@@ -84,15 +89,24 @@ $ ./easygpt --create-setting
 
 ## 使い方1 D&D
 
-設定ファイルがあれば、以下のように使用できる。  
+GUI上での使用方法。ファイルやフォルダを選択して実行ファイルにD&Dする。  
+与えたファイルとフォルダに含まれるファイル全てを一括でAIに与えて処理させる。  
+出力は入力ファイルに`_easygpt_output`を付与した名前で出力される。  
 
-1. gptに投げたいテキストファイル、またはそれが含まれるディレクトリを、 `easygpt`の実行ファイルにドラッグアンドドロップす
-る。
-1. 投げたファイルと同じディレクトリに、入力ファイルに`_easygpt_output`を付与した名前で処理結果を出力される。
+設定ファイルがあれば、以下のように使用できる。  
+1. gptに投げたいテキストファイル、またはそれが含まれるディレクトリを、 
+`easygpt`の実行ファイルにD&Dする。
+1. 入力ファイルに`_easygpt_output`を付与した名前で処理結果を出力される。  
+
+この使い方の時は設定ファイルの設定のうち、
+* input-dir
+* output-dir
+* extension
+を無視する。
 
 ## 使い方2 コマンドラインから実行
 
-簡単な実行方法の例として、設定ファイルにAPIキーが設定されていれば、以下のように使用できる。
+簡単な実行方法の例として、環境変数や、設定ファイルにAPIキーが設定されていれば、以下のように使用できる。
 ```sh
 $ ./easygpt -i 自己紹介してください。
 こんにちは、私はAIです。私はOpenAIが開発した自然言語処理モデルです。私の目的は、ユーザーが質問や要求をすると、最善の回答や応答を提供することです。私は様々なトピックについての情報を持っており、文法やスタイルの修正も行うことができます。どのようにお手伝いできますか？

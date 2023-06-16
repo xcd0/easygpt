@@ -14,12 +14,12 @@ func Unmarshal(b []byte) Setting {
 	return setting
 }
 
-func ReadSettingHjson(path *string) []Setting {
+func ReadSettingHjson(path *string) *Setting {
 
 	if hjsonStr, err := GetText(path); err != nil {
 		log.Printf("Error: %v", err)
 		log.Printf("設定ファイルが不正です。: %v", *path)
-		return []Setting{}
+		return nil
 	} else {
 		b := []byte(*hjsonStr)
 
@@ -37,10 +37,8 @@ func ReadSettingHjson(path *string) []Setting {
 				}
 			*/
 		}
-
 		//j, _ := json.Marshal([]Setting{setting})
 		//log.Printf("setting:\n%v", JsonFormat(j))
-
-		return []Setting{setting}
+		return &setting
 	}
 }
