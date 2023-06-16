@@ -146,6 +146,9 @@ $ ./easygpt -i 自己紹介してください。
 * 設定ファイル
 	* [hjson/hjson-go](https://github.com/hjson/hjson-go)
 		* MIT License
+* LCS(最長共通部分列)の取得
+	* [go.pkgs](github.com/cloudengio/go.pkgs)
+		* Apache License 2.0
 * golang本体
 	* [golang/go](https://github.com/golang/go)
 		* BSD 3-Clause "New" or "Revised" License
@@ -156,7 +159,7 @@ $ ./easygpt -i 自己紹介してください。
 	* [upx/upx](https://github.com/upx/upx)
 		* GPL2+ or UPX LICENSE
 			* https://upx.github.io/upx-license.html
-		* makeの際にバイナリを使用している。かつ使用後のバイナリを無改変で配布している。プログラムにupxのソースコードは含まない。
+		* makeの際にupxで圧縮し、無改変で配布している。プログラムにupxのソースコードは含まない。
 
 ## LICENSE
 

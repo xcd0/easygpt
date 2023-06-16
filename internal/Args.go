@@ -5,8 +5,9 @@ type ArgsAll struct {
 	ArgsDD
 	ArgsCommandLine
 
-	InputText string `arg:"-i,--input-text" help:"質問したい文字列を直接指定。\n                         この引数がある場合、APIキー指定、OpenAIのURL指定、AIのモデル指定、AIのTemperature、\n                         これら以外の引数と設定を無視します。\n"`
-	Readme    bool   `arg:"-r,--readme" help:"詳しい説明文を出力する。長いため\"./easygpt --readme | less\"などで見るのがおすすめ。\n内容はreadme.mdと同じ。"`
+	InputText  string `arg:"-i,--input-text"  help:"質問したい文字列を直接指定。\n                         この引数がある場合、APIキー指定、OpenAIのURL指定、AIのモデル指定、AIのTemperature、\n                         これら以外の引数と設定を無視します。\n"`
+	Readme     bool   `arg:"-r,--readme"      help:"詳しい説明文を出力する。長いため\"./easygpt --readme | less\"などで見るのがおすすめ。\n内容はreadme.mdと同じ。"`
+	OutputText string `arg:"-o,--output-text" help:"--input-textの出力を指定のテキストファイルに保存する。\n                         --input-textの指定がない時この指定は無視される。\n"`
 }
 
 type ArgsSetting struct {

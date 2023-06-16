@@ -37,4 +37,7 @@ func RunInputTextOnArgs(argsAll *ArgsAll, setting *Setting) {
 	}
 
 	fmt.Println(*output)
+	if len(argsAll.OutputText) != 0 {
+		OutputTextForCheck(&argsAll.OutputText, output)
+	}
 }
