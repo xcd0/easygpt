@@ -12,7 +12,7 @@ import (
 var ShowUsage func()
 
 // 戻り値は引数処理結果のsettingと引数にあったファイルのリスト
-func Argparse() (*Setting, []SettingForDD, []string) {
+func Argparse(readme *string) (*Setting, []SettingForDD, []string) {
 	var argsAll ArgsAll = ArgsAll{}
 	parser := arg.MustParse(&argsAll)
 	//log.Printf("argsAll:%v", argsAll)
@@ -31,7 +31,7 @@ func Argparse() (*Setting, []SettingForDD, []string) {
   * 引数による設定ではなく、設定ファイルによる指定を推奨する。
   * 設定ファイルは、'--create-setting'によって雛形を生成可能。
   * APIキーは環境変数'OPENAI_API_KEY'に設定する事を推奨。設定ファイルに指定してもよい。
-  * 詳しくは '--help' を参照。
+  * 詳しくは '--help' や '--readme' を参照。
 
 OPTIONS:
 `, s)
@@ -61,7 +61,7 @@ FILES:
 	}
 
 	// 即終了系の処理 OpenAIに投げないで終了する処理 設定ファイル生成とか
-	RunImmidiateTerminate(&argsAll)
+	RunImmidiateTerminate(&argsAll, readme)
 
 	// 設定ファイル探索
 	setting, err := GetSetting(&argsAll, parser) // 設定ファイルがなかったときはここでは無視する。nilが入る。
@@ -90,14 +90,13 @@ FILES:
 }
 
 // 即終了系の処理 OpenAIに投げないで終了する処理
-func RunImmidiateTerminate(argsAll *ArgsAll) {
-	/*
-		// 引数--readmeがあれば、詳細な説明文を出力して終了する。
-		if argsAll.Readme {
-			ShowDescription()
-			os.Exit(0)
-		}
-	*/
+func RunImmidiateTerminate(argsAll *ArgsAll, readme *string) {
+
+	// 引数--readmeがあれば、詳細な説明文を出力して終了する。
+	if argsAll.Readme {
+		fmt.Println(*readme)
+		os.Exit(0)
+	}
 
 	// 引数で、設定ファイルの雛形を生成する指示があれば生成して終了。
 	if argsAll.CreateSetting {
