@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// RunWithSetting から呼ばれる。
 func GetTargetFiles(dir string, extension string) []string {
 	defer func() {
 		if err := recover(); err != nil {
@@ -26,7 +27,7 @@ func GetTargetFiles(dir string, extension string) []string {
 	// 拡張子指定があれば、その拡張子のファイルのみ使用する。
 	files := []string{}
 	//log.Printf("extension: %v", extension)
-	if extension == "" {
+	if extension == "" || extension == "*" {
 		return fes.Files
 	} else {
 		for _, f := range fes.Files {

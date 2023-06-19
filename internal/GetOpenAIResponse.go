@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -118,17 +117,10 @@ func GetResponseBody(req *http.Request, tmpdir *string, tmpflag bool) []byte {
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
-
 	if resp == nil {
 		log.Printf("レスポンスがnilです。")
 		log.Printf("Request: %v", *req)
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Printf("Error: %v", err)
-		}
-	}(resp.Body)
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -162,5 +154,18 @@ func GetResponseBody(req *http.Request, tmpdir *string, tmpflag bool) []byte {
 		j := JsonFormat(body)
 		OutputTextForCheck(&p, &j)
 	}
+
+	/*
+		defer func(Body io.ReadCloser) {
+			if err := Body.Close(); err != nil {
+				log.Printf("Error: %v", err)
+			}
+		}(resp.Body)
+	*/
+
+	if err := resp.Body.Close(); err != nil {
+		log.Printf("Error: %v", err)
+	}
+
 	return body
 }

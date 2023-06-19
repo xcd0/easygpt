@@ -7,17 +7,43 @@ import (
 	"github.com/alexflint/go-arg"
 )
 
+// もし、初期値が設定されている値が、設定ファイルにおいて指定されていない場合、初期値を指定しなおす。
+func ResetValueIfValueIsEmpty(setting *Setting) {
+	s := GetTemplateSetting()
+	if setting.Temperature == 0 {
+		setting.Temperature = s.Temperature
+	}
+	if len(setting.OpenaiURL) == 0 {
+		setting.OpenaiURL = s.OpenaiURL
+	}
+	if len(setting.AiModel) == 0 {
+		setting.AiModel = s.AiModel
+	}
+}
+
+func HasSetting() bool {
+	s, err := GetSettingFilePath()
+	return err == nil && len(*s) > 0
+}
+
 // 引数と設定ファイルから設定を取得する。
 func GetSetting(argsAll *ArgsAll, parser *arg.Parser) (*Setting, error) {
-	setting := GetTemplateSetting() // 最低限設定しておく
-	if len(argsAll.Setting) > 0 {   // 引数で設定ファイルが指定された
-		setting = ReadSettingHjson(&argsAll.Setting)
-	} else {
-		if s, err := GetSettingFilePath(); err == nil && len(*s) > 0 { // 既定の設定ファイルがあった。
-			setting = ReadSettingHjson(s)
-		}
-	}
+	setting := GetTemplateSetting() // 最低限初期値を設定しておく
 
+	// 設定ファイルによる指定。
+	if s, err := GetSettingFilePath(); err == nil && len(*s) > 0 { // 既定の設定ファイルがあった。
+		setting = ReadSettingHjson(s)
+	}
+	if len(argsAll.Setting) > 0 { // 引数で設定ファイルが指定された
+		setting = ReadSettingHjson(&argsAll.Setting)
+	}
+	// もし、初期値が設定されている値が、設定ファイルにおいて指定されていない場合、初期値を指定しなおす。
+	ResetValueIfValueIsEmpty(setting)
+
+	//ShowSetting(setting)
+	//os.Exit(0)
+
+	// 引数による指定。設定ファイルによる設定を上書きする。
 	args := &argsAll.ArgsCommandLine
 	if len(args.Prompt) != 0 {
 		setting.Prompt = args.Prompt
@@ -33,7 +59,7 @@ func GetSetting(argsAll *ArgsAll, parser *arg.Parser) (*Setting, error) {
 	if len(args.Tmp) != 0 {
 		setting.Tmp = args.Tmp
 	}
-	if setting.Concurrency != 1 {
+	if args.Concurrency != 0 {
 		setting.Concurrency = args.Concurrency
 	}
 	if len(args.AiModel) != 0 {
@@ -44,6 +70,12 @@ func GetSetting(argsAll *ArgsAll, parser *arg.Parser) (*Setting, error) {
 	}
 	if len(args.OpenaiURL) != 0 {
 		setting.OpenaiURL = args.OpenaiURL
+	}
+	if args.Split != 0 {
+		setting.Split = args.Split
+	}
+	if len(args.Move) != 0 {
+		setting.Move = args.Move
 	}
 
 	if GetPostfix(&args.Postfix); len(args.Postfix) != 0 {
@@ -59,9 +91,11 @@ func GetSetting(argsAll *ArgsAll, parser *arg.Parser) (*Setting, error) {
 		} else
 		// ファイルからの取得
 		if ret, errApikey := GetApikey(&args.Apikey, &args.ApiFile); errApikey != nil {
-			// 引数からも、環境変数からも、設定ファイルからも、APIキーが取得できなかった。
-			// APIキーがないと何もできないので終了する。
-			return setting, errApikey // 入力ディレクトリ指定がないこれは続行不可。
+			if len(setting.Apikey) == 0 { // 設定ファイルで既に指定されていなければ
+				// 引数からも、環境変数からも、設定ファイルからも、APIキーが取得できなかった。
+				// APIキーがないと何もできないので終了する。
+				return setting, errApikey // 入力ディレクトリ指定がないこれは続行不可。
+			}
 		} else {
 			setting.InputDir = *ret // 指定されていたので設定ファイルの設定を上書きする。
 		}

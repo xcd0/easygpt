@@ -1,33 +1,28 @@
 package internal
 
 import (
-	"log"
-	"sort"
-	"unicode/utf8"
-
-	//"github.com/cloudengio/go.pkgs/algo/codec"
-	//"github.com/cloudengio/go.pkgs/algo/lcs"
-
-	"cloudeng.io/algo/codec"
-	"cloudeng.io/algo/lcs"
+	"path/filepath"
+	"strings"
 )
 
-func GetCommonParentPath(files []string) string {
+// https://go.dev/play/p/0atgRGr8nhh
 
-	sort.Slice(files, func(i, j int) bool { return files[i] < files[j] })
-
-	for _, f := range files {
-		log.Printf("%v", f)
+func GetCommonParentPath(paths []string) string {
+	if len(paths) == 0 {
+		return ""
 	}
-
-	runeDecoder := codec.NewDecoder(utf8.DecodeRune)
-	for i, max := 0, len(files)-1; i < max; i++ {
-		a := runeDecoder.Decode([]byte(files[i]))
-		b := runeDecoder.Decode([]byte(files[i+1]))
-		all := lcs.NewDP(a, b).AllLCS()
-		for _, lcs := range all {
-			log.Printf("lcs:%v", string(lcs))
+	commonParts := strings.Split(filepath.ToSlash(paths[0]), "/")
+	for _, path := range paths[1:] {
+		pathParts := strings.Split(filepath.ToSlash(path), "/")
+		for i := len(commonParts); i > 0; i-- {
+			if strings.Join(commonParts[:i], "/") == strings.Join(pathParts[:i], "/") {
+				commonParts = commonParts[:i]
+				break
+			}
+			if i == 1 {
+				return "/"
+			}
 		}
 	}
-	return ""
+	return strings.Join(commonParts, "/")
 }

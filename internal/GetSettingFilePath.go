@@ -8,6 +8,7 @@ import (
 )
 
 func GetSettingFilePath() (*string, error) {
+
 	dirs := []string{GetCurrentDir(), GetHomeDir(), GetBinDir()}
 	settingFileNames := []string{
 		"easygpt.hjson",
@@ -16,12 +17,14 @@ func GetSettingFilePath() (*string, error) {
 	}
 	// 設定ファイルは、カレントディレクトリ -> ホームディレクトリ -> 実行ファイルがあるディレクトリ
 	// の順で調べる。
+	//log.Printf("dirs : %v", dirs)
 	for _, d := range dirs {
 		for _, n := range settingFileNames {
 			p := filepath.Join(d, n)
 			//log.Printf("Debug: check path : %v", p)
 			if _, err := os.Stat(p); err == nil {
 				// 設定ファイルがあった。
+				//log.Printf("setting : %v", p)
 				return &p, nil
 			}
 		}

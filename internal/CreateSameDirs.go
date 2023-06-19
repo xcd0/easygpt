@@ -30,9 +30,14 @@ func CreateSameDirsOn(ref_dir, target_dir string) {
 
 	// 出力先ディレクトリを作っておく
 	if err := os.Mkdir(target_dir, 0777); err != nil {
-		fe, e := "file exists", err.Error()
-		if ee := e[len(e)-len(fe):]; ee != fe {
-			log.Printf("Error: %v", err)
+		// 既に存在していたエラーは無視したい。
+		if strings.Contains(err.Error(), "Cannot create a file when that file already exists.") {
+			// 無視
+		} else {
+			fe, e := "file exists", err.Error()
+			if ee := e[len(e)-len(fe):]; ee != fe {
+				log.Printf("Error: %v", err)
+			}
 		}
 	}
 

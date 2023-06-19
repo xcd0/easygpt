@@ -6,7 +6,7 @@ type ArgsAll struct {
 	ArgsCommandLine
 
 	InputText  string `arg:"-i,--input-text"  help:"質問したい文字列を直接指定。\n                         この引数がある場合、APIキー指定、OpenAIのURL指定、AIのモデル指定、AIのTemperature、\n                         これら以外の引数と設定を無視します。\n"`
-	Readme     bool   `arg:"-r,--readme"      help:"詳しい説明文を出力する。長いため\"./easygpt --readme | less\"などで見るのがおすすめ。\n内容はreadme.mdと同じ。"`
+	Readme     bool   `arg:"-r,--readme"      help:"詳しい説明文を出力する。長いため\"./easygpt --readme | less\"などで見るのがおすすめ。\n                         内容はreadme.mdと同じ。"`
 	OutputText string `arg:"-o,--output-text" help:"--input-textの出力を指定のテキストファイルに保存する。\n                         --input-textの指定がない時この指定は無視される。\n"`
 }
 
@@ -33,4 +33,6 @@ type ArgsCommandLine struct {
 	AiModel     string  `arg:"-m,--model"        help:"使用するAIのモデル。\n                         3か月くらいで新しいモデルが出るので偶にチェックするのがおすすめ。\n                         使用できるモデルは\n                         curl -s https://api.openai.com/v1/models -H \"Authorization: Bearer $OPENAI_API_KEY\" | gojq -r \".data[].id\" | grep gpt | sort\n                         で得られる。\n"`
 	Temperature float64 `arg:"-t,--temperature"  help:"これは、AIに与える変数で、返答のランダム性を制御するパラメータである。\n                         値が小さいほどよくある解答など決まりきった解答を返し、\n                         値が大きいほど奇抜な返答が返ってきやすくなる。\n                         0から2の範囲の値を設定する。詳細は\n                         https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature\n                         を参照。\n"`
 	OpenaiURL   string  `arg:"--openai-url"      help:"OpenAIのAPIで使用するURL。\n                         基本的に\"https://api.openai.com/v1/chat/completions\"だが、\n                         将来変更されるかもしれないので設定できるようにしておく。\n"`
+	Split       int     `arg:"--split"           help:"入力ファイルが大きいため、AIの出力が途切れてしまう場合がある。\n                         これを回避するために、入力ファイルを分割してAIに与えたいとき、\n                         ここに分割するバイト数をkB単位で大雑把に指定できる。\n                         0~16の値を指定できる。単位はkB。トークン数ではない。0または未指定の時、分割しない。\n"`
+	Move        string  `arg:"-m,--move"         help:"処理が完了したファイルを指定のディレクトリに移動する。\n                         エラー時に再実行しやすくなる。未指定の時移動させない。\n"`
 }

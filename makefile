@@ -76,9 +76,16 @@ install-commitlint:
 	go install github.com/conventionalcommit/commitlint@latest
 
 update-readme:
-	./easygpt -p '以下を英訳せよ' ./readme.md --postfix "_en"
+	-@./easygpt -p '以下を英訳せよ' ./readme.md --postfix "_en"
+	-@./easygpt.exe -p '以下を英訳せよ' ./readme.md --postfix "_en"
 
 clean:
 	rm easygpt easygpt.exe easygpt_mac
+
+
+get:
+	go install github.com/itchyny/gojq/cmd/gojq@latest
+	-@sudo apt install -y upx
+	-@pacman -S upx
 
 

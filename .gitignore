@@ -1,6 +1,6 @@
 apikey.txt
 prompt.txt
-easygpt.hjson 
+*.hjson 
 easygpt
 easygpt.exe
 easygpt_mac
