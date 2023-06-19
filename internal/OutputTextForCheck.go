@@ -15,4 +15,5 @@ func OutputTextForCheck(file, str *string) {
 			log.Printf("Warning: %v", err)
 		}
 	}
+	//log.Printf("Debug: output : %v", file)
 }

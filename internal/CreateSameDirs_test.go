@@ -12,7 +12,6 @@ func TestCreateSameDirsOn(t *testing.T) {
 	setting := Setting{
 		InputDir:  "./for_test/input",
 		OutputDir: "./for_test/output",
-		Prompt:    "aaa",
 	}
 
 	os.RemoveAll(setting.OutputDir)

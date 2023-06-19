@@ -30,8 +30,9 @@ func RunInputTextOnArgs(argsAll *ArgsAll, setting *Setting) {
 	}
 	s.Temperature = Clamp(s.Temperature, 0, 2)
 
-	output := QuestionByText(&argsAll.InputText, s, false)
-	if output == nil {
+	output, err := QuestionByText(&argsAll.InputText, s, false, nil)
+	if output == nil || err != nil {
+		log.Printf("%v", err)
 		fmt.Fprintln(os.Stderr, "エラー終了")
 		os.Exit(1)
 	}
