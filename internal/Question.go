@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -55,5 +56,6 @@ func QuestionByText(inputText *string, setting *Setting, tmpflag bool, id *strin
 		p := filepath.Join(*id, "output.txt")
 		OutputTextForCheck(&p, &output)
 	}
+	log.Printf("QuestionByText : id : %v \n\n", *id)
 	return &output, nil
 }

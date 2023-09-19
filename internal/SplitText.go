@@ -14,7 +14,9 @@ var (
 	reg_elem_h   = regexp.MustCompile("^#")
 	reg_elem_pre = regexp.MustCompile("```")
 	//reg_elem_empty = regexp.MustCompile("^\n") // 本来これ
-	reg_elem_empty = regexp.MustCompile("\n$") // 一度全て改行で分割した後、空行を前の要素の末尾に\nとして付与しているのでこれで空行判定する。
+	reg_elem_empty         = regexp.MustCompile("\n$") // 一度全て改行で分割した後、空行を前の要素の末尾に\nとして付与しているのでこれで空行判定する。
+	reg_elem_func_end      = regexp.MustCompile("^}$")
+	reg_elem_comment_start = regexp.MustCompile("^$// ")
 )
 
 // var IsOver func(value, num int) bool
@@ -87,6 +89,7 @@ func SplitText(text *string, num int) []string {
 		}
 	*/
 	// }}}
+	divided = DivideByFuncEnd(divided, num)
 
 	out := []string{}
 	for _, d := range divided {
@@ -104,6 +107,67 @@ func calcStrArrayLength(d []string) int {
 	}
 	return s
 }
+
+func DivideByFuncEnd(divided [][]string, num int) [][]string { // {{{
+	out := [][]string{}
+
+	for _, d := range divided {
+		// dのサイズを計算
+		s := calcStrArrayLength(d)
+		//log.Printf("s:%v, num:%v", s, num)
+		//log.Printf("-------------------------------------------------------------")
+		if !IsOver(s, num) {
+			//log.Printf("=============================================================")
+			// 越えていないのでそのまま維持
+			log.Printf("divideByFuncEnd 越えていないのでそのまま維持 s : %v, num : %v", s, num)
+			out = append(out, d)
+			continue
+		}
+		//log.Printf("-------------------------------------------------------------")
+		// サイズが超えているので分割
+		flagPre := false // <pre>要素内で区切りたくない。
+		// 一度bufに入れて、越えたときのbufをoutに吐く
+		var buf []string // 越えていない状態の文字列群
+		bufsize := 0
+		for _, str := range d {
+			// 行ごとの処理
+
+			if reg_elem_pre.MatchString(str) { // <pre>に相当する```にマッチした
+				flagPre = !flagPre
+			}
+			if flagPre { // <pre>要素の中の時
+				bufsize += len(str)
+				buf = append(buf, str)
+			} else {
+				// <pre>要素でない時
+				// 空行があれば、その直前まででサイズを計算
+
+				if !reg_elem_func_end.MatchString(str) { // ^}$にマッチ
+					bufsize += len(str)
+					buf = append(buf, str)
+				} else {
+					// 空行のとき直前までのbufにstrを足したときに閾値を超えるか
+					// 関数の末尾かっこにマッチさせるので、strも含める
+					if IsOver(bufsize+len(str), num) {
+						// 超えた
+						buf = append(buf, str)
+						out = append(out, buf)
+						// リセット
+						buf = []string{}
+						bufsize = 0
+					} else {
+						// 超えていない、bufに結合する
+						bufsize += len(str)
+						buf = append(buf, str)
+					}
+				}
+			}
+		}
+		// 残り
+		out = append(out, buf)
+	}
+	return out
+} // }}}
 
 // サイズで区切る
 // 空行のところでサイズチェックして超える前で分割する
@@ -132,8 +196,9 @@ func DivideBySize(divided [][]string, num int) [][]string { // {{{
 			// 行ごとの処理
 			if reg_elem_pre.MatchString(str) { // <pre>に相当する```にマッチした
 				flagPre = !flagPre
+				log.Printf("reg_elem_pre.MatchString(str) にマッチ, str : %v, flagPre : %v", str, flagPre)
 			}
-			if !flagPre { // <pre>要素の中の時
+			if flagPre { // <pre>要素の中の時
 				bufsize += len(str)
 				buf = append(buf, str)
 			} else {

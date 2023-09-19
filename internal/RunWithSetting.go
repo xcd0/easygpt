@@ -71,13 +71,17 @@ func RunWithSetting(setting *Setting) {
 		inputText := GetTextNoError(f)
 		// テキストファイル分割
 		strs := SplitText(inputText, setting.Split)
+		log.Printf("split input text size : %v -> %v", f, len(strs))
 		//log.Printf("split threshold : %v kB", setting.Split)
 		//log.Printf("splited         : %v", len(strs))
 		splited[*f] = strs
 		// 2足しているのは、処理に入った瞬間に1を足している分と、結合処理の終了で1足している分
 		//pbs[i] = pb.New(len(strs) + 3).Prefix(fmt.Sprintf("%-50s", filepath.Base(*f)))
-		pbs[i] = pb.New(len(strs) + 1).Prefix(fmt.Sprintf("%-50s", filepath.Base(*f)))
+		//pbs[i] = pb.New(len(strs) + 1).Prefix(fmt.Sprintf("%-50s", filepath.Base(*f)))
+		pbs[i] = pb.New(len(strs)).Prefix(fmt.Sprintf("%-50s", filepath.Base(*f)))
 	}
+
+	log.Printf("split input text size : %v", len(splited))
 
 	pool, err := pb.StartPool(pbs...)
 	if err != nil {
@@ -100,8 +104,14 @@ func RunWithSetting(setting *Setting) {
 		p := pbs[i]
 		//log.Printf("%v:%v", i, f)
 		go func(f string, p *pb.ProgressBar) {
-			defer wg.Done()
-			defer func() { <-sem }()
+			defer func() {
+				log.Printf("pool %v : %v finished", f, i)
+				wg.Done()
+				<-sem
+				p.Finish()
+			}()
+			//defer func() { <-sem }()
+			p.Increment()
 			Ask(&f, setting, p, splited[f])
 		}(f, p)
 	}
@@ -126,8 +136,8 @@ func Move(src, dst string) {
 }
 
 func Ask(input_file *string, setting *Setting, p *pb.ProgressBar, strs []string) bool {
-	defer p.Finish()
-	p.Increment()
+	//defer p.Finish()
+	//p.Increment()
 
 	ret := false
 
@@ -151,12 +161,9 @@ func Ask(input_file *string, setting *Setting, p *pb.ProgressBar, strs []string)
 	for i, _ := range strs {
 		wgAsk.Add(1)
 		go func(i int, id *string, strs []string, setting *Setting, tmpflag bool, output *string) {
-			defer p.Increment()
-			defer wgAsk.Done()
 			outputText, err := task(i, id, &strs[i], setting, tmpflag)
 			if err != nil {
 				log.Printf("Error: %v, %+v", *input_file, err)
-				return // 不正終了
 			} else {
 				*output = *outputText + "\n"
 				if tmpflag {
@@ -165,9 +172,17 @@ func Ask(input_file *string, setting *Setting, p *pb.ProgressBar, strs []string)
 					OutputTextForCheck(&p, outputText)
 				}
 			}
+			defer func() {
+				p.Increment()
+				wgAsk.Done()
+				log.Printf("- go func defer() ----------------------------------\n\n")
+			}()
 		}(i, &id, strs, setting, tmpflag, &output[i])
 	}
 	wgAsk.Wait()
+
+	log.Printf("\n-wgAsk.Wait()wgAsk.Wait()wgAsk.Wait()wgAsk.Wait()wgAsk.Wait()----------------------------------\n")
+	log.Printf("\n-wgAsk.Wait()wgAsk.Wait()wgAsk.Wait()wgAsk.Wait()wgAsk.Wait()----------------------------------\n")
 
 	if false {
 		for i, o := range output {
@@ -197,9 +212,11 @@ func Ask(input_file *string, setting *Setting, p *pb.ProgressBar, strs []string)
 			}
 		}
 	}
+	log.Printf("\n-結合処理----------------------------------\n")
 	// 結合
 	outputText := strings.Join(output, "\n")
 	OutputTextForCheck(&outputpath, &outputText)
+	log.Printf("\n-----------------------------------\n")
 
 	// 正常終了。正常に処理完了したファイルを移動させる。
 	ret = true
@@ -215,6 +232,7 @@ func Ask(input_file *string, setting *Setting, p *pb.ProgressBar, strs []string)
 			}
 			Move(*input_file, outrpath)
 			failedFiles.Set(true, input_file)
+			log.Printf("\n-defer()----------------------------------\n")
 		}
 		defer func() {
 			// 処理に失敗したファイルの一覧を出力する
@@ -224,6 +242,7 @@ func Ask(input_file *string, setting *Setting, p *pb.ProgressBar, strs []string)
 					fmt.Println(v.value)
 				}
 			}
+			log.Printf("\n-defer()内defer()----------------------------------\n")
 		}()
 	}()
 	return ret
